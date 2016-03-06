@@ -172,6 +172,10 @@ config RTCONFIG_IPSEC
 	bool "IPsec"
 	default n
 
+config RTCONFIG_UNBOUND
+	bool "Unbound"
+	default n
+
 # !!TB
 config RTCONFIG_IPV6
 	bool "IPv6 Support"
