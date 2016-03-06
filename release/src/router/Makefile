@@ -3231,7 +3231,7 @@ unbound-configure:
 		CFLAGS="-Os -Wall $(EXTRACFLAGS) -ffunction-sections -fdata-sections $(if $(RTCONFIG_HTTPS),-I$(TOP)/openssl/include/openssl)" \
 		LDFLAGS="$(EXTRALDFLAGS) $(if $(RTCONFIG_HTTPS),-L$(TOP)/openssl -lcrypto -lssl) -L$(TOP)/expat-2.0.1/.libs -ffunction-sections -fdata-sections -Wl,--gc-sections" \
 		CPPFLAGS="-I$(TOP)/openssl/include -I$(TOP)/expat-2.0.1/lib -I$(TOP)/shared" \
-		$(CONFIGURE) --prefix=/usr --bindir=/usr/sbin --libdir=/usr/lib \
+		$(CONFIGURE) --prefix=/usr --bindir=/usr/sbin --libdir=/usr/lib --sysconfdir=/etc \
 			--disable-debug --without-pthreads \
 	)
 
