@@ -984,6 +984,10 @@ define RouterOptions
 		sed -i "/RTCONFIG_OPENVPN/d" $(1); \
 		echo "RTCONFIG_OPENVPN=y" >>$(1); \
  	fi; \
+	if [ "$(UNBOUND)" = "y" ]; then \
+		sed -i "/RTCONFIG_UNBOUND/d" $(1); \
+		echo "RTCONFIG_UNBOUND=y" >>$(1); \
+	fi; \
 	if [ "$(APP)" = "installed" ]; then \
 		sed -i "/RTCONFIG_APP_PREINSTALLED/d" $(1); \
 		echo "RTCONFIG_APP_PREINSTALLED=y" >>$(1); \

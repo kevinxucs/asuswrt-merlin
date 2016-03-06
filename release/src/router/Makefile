@@ -573,6 +573,7 @@ obj-$(RTCONFIG_QUAGGA) += quagga
 obj-$(RTCONFIG_LZO) += lzo
 obj-$(RTCONFIG_OPENVPN) += openpam
 obj-$(RTCONFIG_OPENVPN) += openvpn
+obj-$(RTCONFIG_UNBOUND) += unbound expat-2.0.1
 
 obj-$(CONFIG_LINUX26) += hotplug2
 obj-$(CONFIG_LINUX26) += udev
@@ -3215,6 +3216,38 @@ openvpn-install: openvpn
 	$(STRIP) -s $(INSTALLDIR)/openvpn/usr/lib/openvpn-plugin-auth-pam.so
 	@mkdir -p $(TARGETDIR)/rom/easy-rsa
 	install openvpn/easy-rsa/2.0/* $(TARGETDIR)/rom/easy-rsa
+
+unbound: openssl expat-2.0.1 unbound/Makefile
+	$(MAKE) -C $@ $(PARALLEL_BUILD)
+
+unbound/Makefile:
+	$(MAKE) unbound-configure
+
+unbound-configure:
+	( cd unbound; export OPENSSL_CRYPTO_CFLAGS="-I$(TOP)/openssl"; \
+		export OPENSSL_CRYPTO_LIBS="-L$(TOP)/openssl -lcrypto"; \
+		export OPENSSL_SSL_CFLAGS="-I$(TOP)/openssl"; \
+		export OPENSSL_SSL_LIBS="-L$(TOP)/openssl -lssl"; \
+		CFLAGS="-Os -Wall $(EXTRACFLAGS) -ffunction-sections -fdata-sections $(if $(RTCONFIG_HTTPS),-I$(TOP)/openssl/include/openssl)" \
+		LDFLAGS="$(EXTRALDFLAGS) $(if $(RTCONFIG_HTTPS),-L$(TOP)/openssl -lcrypto -lssl) -L$(TOP)/expat-2.0.1/.libs -ffunction-sections -fdata-sections -Wl,--gc-sections" \
+		CPPFLAGS="-I$(TOP)/openssl/include -I$(TOP)/expat-2.0.1/lib -I$(TOP)/shared" \
+		$(CONFIGURE) --prefix=/usr --bindir=/usr/sbin --libdir=/usr/lib \
+			--disable-debug --without-pthreads \
+	)
+
+unbound-clean:
+	[ ! -f unbound/Makefile ] || $(MAKE) -C unbound clean
+	@rm -f unbound/Makefile
+
+unbound-install: unbound
+	install -D unbound/unbound $(INSTALLDIR)/unbound/usr/sbin/unbound
+	install -D unbound/.libs/unbound-anchor $(INSTALLDIR)/unbound/usr/sbin/unbound-anchor
+	install -D unbound/.libs/libunbound.so.2.4.0 $(INSTALLDIR)/unbound/usr/lib/libunbound.so.2.4.0
+	$(STRIP) $(INSTALLDIR)/unbound/usr/sbin/unbound
+	$(STRIP) $(INSTALLDIR)/unbound/usr/sbin/unbound-anchor
+	$(STRIP) $(INSTALLDIR)/unbound/usr/lib/libunbound.so.2.4.0
+	cd $(INSTALLDIR)/unbound/usr/lib && ln -sf libunbound.so.2.4.0 libunbound.so.2
+	cd $(INSTALLDIR)/unbound/usr/lib && ln -sf libunbound.so.2.4.0 libunbound.so
 
 sdparm-1.02: sdparm-1.02/Makefile
 	$(MAKE) -C $@
